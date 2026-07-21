@@ -1,2 +1,1 @@
-# fde-bootcamp-
-Personal journey to train as an FDE
+# FDE 4-Week Bootcamp

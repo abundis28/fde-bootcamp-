@@ -35,7 +35,21 @@ class TaskStore():
                 return task
 
     def update_task(self, task_id: int, description: str, completed: bool):
-        pass
+        if not isinstance(task_id, int):
+            raise TypeError("Task ID must be an integer.")
+        if not isinstance(description, str):
+            raise TypeError("Description must be a string.")
+        if not isinstance(completed, bool):
+            raise TypeError("Completed must be a boolean value.")
+        if task_id not in self.ids:
+            raise KeyError("Task ID does not exist.")
+        if description in self.descriptions:
+            raise ValueError("Task with this description already exists.")
+        for task in self.tasks:
+            if task.id == task_id:
+                task.description = description
+                task.completed = completed
+                return True
 
     def delete_task(self, task_id: int):
         pass

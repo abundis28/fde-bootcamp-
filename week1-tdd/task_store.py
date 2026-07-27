@@ -52,4 +52,13 @@ class TaskStore():
                 return True
 
     def delete_task(self, task_id: int):
-        pass
+        if not isinstance(task_id, int):
+            raise TypeError("Task ID must be an integer.")
+        if task_id not in self.ids:
+            raise KeyError("Task ID does not exist.")
+        for task in self.tasks:
+            if task.id == task_id:
+                self.tasks.remove(task)
+                self.descriptions.remove(task.description)
+                self.ids.remove(task.id)
+                return True

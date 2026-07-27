@@ -58,7 +58,7 @@ def test_update_task_id_exists():
     task = Task("Get bread", False)
     task_id = task_store.add_task(task)
     # Act
-    task_update_status = task_store.update_task(task_id, "Get Milk", False)
+    task_update_status = task_store.update_task(task_id, description="Get Milk", completed=False)
     # Assert
     assert task_update_status is True
     assert task_store.read_task(task_id).description == "Get Milk"
@@ -69,7 +69,7 @@ def test_update_task_id_does_not_exist():
     task_store = TaskStore()
     # Act & Assert
     with pytest.raises(KeyError):
-        task_store.update_task(999, "Get Milk", False)
+        task_store.update_task(999, description="Get Milk", completed=False)
 
 def test_update_task_incorrect_type_description():
     # Arrange
@@ -78,7 +78,7 @@ def test_update_task_incorrect_type_description():
     task_id = task_store.add_task(task)
     # Act & Assert
     with pytest.raises(TypeError):
-        task_store.update_task(task_id, 123, False)
+        task_store.update_task(task_id, description=123, completed=False)
 
 def test_update_task_incorrect_type_completed():
     # Arrange
@@ -87,7 +87,7 @@ def test_update_task_incorrect_type_completed():
     task_id = task_store.add_task(task)
     # Act & Assert
     with pytest.raises(TypeError):
-        task_store.update_task(task_id, "Get Milk", "not_a_boolean")
+        task_store.update_task(task_id, description="Get Milk", completed="not_a_boolean")
 
 def test_update_task_incorrect_type_id():
     # Arrange
@@ -96,7 +96,7 @@ def test_update_task_incorrect_type_id():
     task_id = task_store.add_task(task)
     # Act & Assert
     with pytest.raises(TypeError):
-        task_store.update_task("invalid_id", "Get Milk", "not_a_boolean")
+        task_store.update_task("invalid_id", description="Get Milk", completed="not_a_boolean")
 
 def test_delete_task_id_exists():
     # Arrange

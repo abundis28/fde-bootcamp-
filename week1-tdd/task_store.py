@@ -26,18 +26,18 @@ class TaskStore():
             raise KeyError("Task ID does not exist.")
         return self.tasks.get(task_id)
 
-    def update_task(self, task_id: int, description: str, completed: bool):
+    def update_task(self, task_id: int, **changes):
         if not isinstance(task_id, int):
             raise TypeError("Task ID must be an integer.")
-        if not isinstance(description, str):
+        if not isinstance(changes.get("description"), str):
             raise TypeError("Description must be a string.")
-        if not isinstance(completed, bool):
+        if not isinstance(changes.get("completed"), bool):
             raise TypeError("Completed must be a boolean value.")
         if task_id not in self.tasks:
             raise KeyError("Task ID does not exist.")
         task = self.tasks[task_id]
-        task.description = description
-        task.completed = completed
+        task.description = changes.get("description")
+        task.completed = changes.get("completed")
         return True
 
     def delete_task(self, task_id: int):

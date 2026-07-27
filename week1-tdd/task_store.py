@@ -8,6 +8,7 @@ class TaskStore():
     def __init__(self):
         self.tasks = []
         self.descriptions = set()
+        self.ids = set()
         self.next_id = 1
 
     def add_task(self, task: Task):
@@ -21,10 +22,17 @@ class TaskStore():
         self.next_id += 1
         self.tasks.append(task)
         self.descriptions.add(task.description)
+        self.ids.add(task.id)
         return task.id
 
     def read_task(self, task_id: int):
-        pass
+        if not isinstance(task_id, int):
+            raise TypeError("Task ID must be an integer.")
+        if task_id not in self.ids:
+            raise KeyError("Task ID does not exist.")
+        for task in self.tasks:
+            if task.id == task_id:
+                return task
 
     def update_task(self, task_id: int, description: str, completed: bool):
         pass

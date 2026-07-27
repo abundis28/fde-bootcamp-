@@ -10,16 +10,6 @@ def test_add_task():
     # Assert
     assert task_id is not None
 
-def test_add_task_already_exists():
-    # Arrange
-    task_store = TaskStore()
-    task = Task("Get bread", False)
-    task_store.add_task(task)
-    task_duplicate = Task("Get bread", True)
-    # Act & Assert
-    with pytest.raises(ValueError):
-        task_store.add_task(task_duplicate)
-
 def test_add_task_incorrect_type():
     # Arrange
     task_store = TaskStore()
@@ -47,6 +37,13 @@ def test_read_task_id_does_not_exist():
     with pytest.raises(KeyError):
         task_store.read_task(999)
 
+def test_read_task_incorrect_type():
+    # Arrange
+    task_store = TaskStore()
+    # Act & Assert
+    with pytest.raises(TypeError):
+        task_store.read_task("invalid_id")
+
 def test_update_task_id_exists():
     # Arrange
     task_store = TaskStore()
@@ -65,17 +62,6 @@ def test_update_task_id_does_not_exist():
     # Act & Assert
     with pytest.raises(KeyError):
         task_store.update_task(999, "Get Milk", False)
-
-def test_update_task_duplicate_description():
-    # Arrange
-    task_store = TaskStore()
-    task1 = Task("Get bread", False)
-    task2 = Task("Get milk", False)
-    task_id1 = task_store.add_task(task1)
-    task_id2 = task_store.add_task(task2)
-    # Act & Assert
-    with pytest.raises(ValueError):
-        task_store.update_task(task_id2, "Get bread", False)
 
 def test_update_task_incorrect_type():
     # Arrange

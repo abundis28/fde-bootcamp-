@@ -1,9 +1,11 @@
 import pytest
 from task_store import TaskStore, Task
+from unittest.mock import Mock
 
 @pytest.fixture
 def task_store():
-    return TaskStore()
+    id_generator = Mock(return_value=1)
+    return TaskStore(id_generator=id_generator)
 
 @pytest.fixture
 def store_with_task(task_store):

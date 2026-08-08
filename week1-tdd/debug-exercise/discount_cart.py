@@ -34,4 +34,4 @@ class Cart:
 
     def is_eligible_for_free_shipping(self, threshold=50):
         """True if the cart qualifies for free shipping. See SPEC.md."""
-        return self.subtotal() > threshold
+        return self.subtotal() >= threshold

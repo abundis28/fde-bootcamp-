@@ -37,3 +37,14 @@ def test_discount_rejects_out_of_range_percent():
 
 
 # --- TODO (you): add tests that expose the three planted bugs ---
+def test_two_carts_are_independent():
+    # Arrange
+    cart1 = Cart()
+    cart2 = Cart()
+    cart1.add_item("apple", 10.0)
+    cart2.add_item("bread", 5.0)
+    # Act / Assert
+    assert cart1.subtotal() == 10.0
+    assert cart2.subtotal() == 5.0
+
+

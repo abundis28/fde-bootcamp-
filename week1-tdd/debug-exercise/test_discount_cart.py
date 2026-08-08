@@ -56,6 +56,14 @@ def test_discount_zero_percent_returns_full_price():
     assert cart.apply_discount(0) == 10.0
 
 
+def test_discount_100_percent_returns_zero():
+    # Arrange
+    cart = Cart()
+    cart.add_item("apple", 10.0)
+    # Act / Assert
+    assert cart.apply_discount(100) == 0.0
+
+
 def test_free_shipping_threshold():
     # Arrange
     cart = Cart()

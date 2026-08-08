@@ -27,10 +27,8 @@ class Cart:
         """
         if percent < 0 or percent > 100:
             raise ValueError("percent must be between 0 and 100")
-        elif percent == 0:
-            return self.subtotal()
 
-        return self.subtotal() * (percent / 100)
+        return self.subtotal() * ((100 - percent) / 100)
 
     def is_eligible_for_free_shipping(self, threshold=50):
         """True if the cart qualifies for free shipping. See SPEC.md."""

@@ -60,7 +60,6 @@ def test_add_task(task_store):
 ])
 def test_add_task_incorrect_types(task_store, description, completed):
     # Arrange
-    task_store = TaskStore()
     # Act & Assert
     with pytest.raises(TypeError):
         task_store.add_task(Task(description, completed))

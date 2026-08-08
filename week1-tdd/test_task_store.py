@@ -13,6 +13,37 @@ def store_with_task(task_store):
     task_id = task_store.add_task(task)
     return task_store, task_id
 
+@pytest.fixture
+def store_with_no_id_mock():
+    return TaskStore(id_generator=None)
+
+def test_add_task_with_no_id_generator(store_with_no_id_mock):
+    # Arrange
+    task = Task("Get bread", False)
+    # Act
+    task_id = store_with_no_id_mock.add_task(task)
+    # Assert
+    assert task_id is not None
+
+def test_add_multiple_tasks_with_no_id_generator(store_with_no_id_mock):
+    # Arrange
+    task1 = Task("Get bread", False)
+    task2 = Task("Get milk", True)
+    # Act
+    task_id1 = store_with_no_id_mock.add_task(task1)
+    task_id2 = store_with_no_id_mock.add_task(task2)
+    # Assert
+    assert task_id1 is not None
+    assert task_id2 is not None
+    assert task_id1 != task_id2
+
+def test_add_uses_injected_id_generator():
+    gen = Mock(return_value=42)
+    store = TaskStore(id_generator=gen)
+    task_id = store.add_task(Task("Get bread", False))
+    assert task_id == 42
+    gen.assert_called_once()
+
 def test_add_task(task_store):
     # Arrange
     task = Task("Get bread", False)
@@ -77,21 +108,29 @@ def test_update_task_id_does_not_exist(task_store):
     with pytest.raises(KeyError):
         task_store.update_task(999, description="Get Milk", completed=False)
 
-@pytest.mark.parametrize("id, description, completed", [
-    (123, "Get Milk", False),          # bad description
-    (456, "Get bread", 12),     # bad completed
-    (789, None, False) ,         # bad description
-    (0, "Get bread", None),    # bad completed
-    ("invalid_id", "Get Milk", False),        # bad id
-    ("", "Get bread", 12),                  # empty string
-    (None, "Get bread", None)                 # None value
+@pytest.mark.parametrize("description, completed", [
+    (12, False),          # bad description
+    ("Get bread", 12),     # bad completed
+    (None, False) ,         # bad description
+    ("Get bread", None),    # bad completed
 ])
-def test_update_task_incorrect_type(store_with_task, id, description, completed):
+def test_update_task_incorrect_type(store_with_task, description, completed):
     # Arrange
-    task_store, _ = store_with_task
+    task_store, id = store_with_task
     # Act & Assert
     with pytest.raises(TypeError):
-        task_store.update_task(id, description, completed)
+        task_store.update_task(id, description=description, completed=completed)
+
+@pytest.mark.parametrize("p_id", [
+    ("invalid_id"),        # bad id
+    (""),                  # empty string
+    (None)                 # None value
+])
+def test_update_task_incorrect_id_type(task_store, p_id):
+    # Arrange
+    # Act & Assert
+    with pytest.raises(TypeError):
+        task_store.update_task(p_id, description="Get Milk", completed=False)
 
 def test_delete_task_id_exists(store_with_task):
     # Arrange

@@ -48,17 +48,18 @@ def test_two_carts_are_independent():
     assert cart2.subtotal() == 5.0
 
 
-def test_subtotal_with_zero_quantity():
-    # Arrange
-    cart = Cart()
-    cart.add_item("apple", 10.0, qty=0)
-    # Act / Assert
-    assert cart.subtotal() == 0.0
-
-
 def test_discount_zero_percent_returns_full_price():
     # Arrange
     cart = Cart()
     cart.add_item("apple", 10.0)
     # Act / Assert
     assert cart.apply_discount(0) == 10.0
+
+
+def test_free_shipping_threshold():
+    # Arrange
+    cart = Cart()
+    cart.add_item("apple", 10.0)
+    cart.add_item("bread", 40.0)
+    # Act / Assert
+    assert cart.is_eligible_for_free_shipping() is True

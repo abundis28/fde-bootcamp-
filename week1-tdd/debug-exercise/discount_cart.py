@@ -10,8 +10,8 @@ Do NOT rewrite the module from scratch. Diagnose, isolate, and fix.
 
 
 class Cart:
-    def __init__(self, items=[]):
-        self.items = items
+    def __init__(self, items=None):
+        self.items = items if items is not None else []
 
     def add_item(self, name, price, qty=1):
         self.items.append({"name": name, "price": price, "qty": qty})

@@ -6,8 +6,8 @@
 
 ### Bug 2
 - Symptom (what failed / wrong output): If discount was 0, the returned subtotal was 0 instead of full price.
-- Root cause (the actual defect in the code): There was no condition for 0 as input for discount. Mutiplying subtotal times 0, always returned 0.
-- Fix (what you changed): Added condition to catch 0 discount scenario.
+- Root cause (the actual defect in the code): The calculation was wrong and was only multiplying the subtotal instead of the remaining part.
+- Fix (what you changed): Corrected the calculation of the remaining subtotal after the discount.
 - Which test catches it: test_discount_zero_percent_returns_full_price()
 
 ### Bug 3

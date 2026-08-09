@@ -64,6 +64,15 @@ def test_discount_100_percent_returns_zero():
     assert cart.apply_discount(100) == 0.0
 
 
+def test_discount_spec_case():
+    # Arrange
+    cart = Cart()
+    cart.add_item("apple", 10.0, qty=2)
+    cart.add_item("bread", 40.0, qty=2)
+    # Act / Assert
+    assert cart.apply_discount(10) == 90.0
+
+
 def test_free_shipping_threshold():
     # Arrange
     cart = Cart()

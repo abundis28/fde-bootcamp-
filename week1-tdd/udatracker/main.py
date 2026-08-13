@@ -18,7 +18,7 @@ class Order(BaseModel):
     customer_name: str = Field(..., min_length=1, max_length=100, description="The name of the customer")
     items: list[OrderItem] = Field(..., min_length=1, description="The items in the order")
     status: str = Field(..., min_length=2, max_length=100, description="The current status of the order")
-    total_amount: float = Field(..., gt=0, description="The total amount for the order")
+    total_amount: float = Field(..., ge=0, description="The total amount for the order")
     created_at: str = Field(..., description="The date and time when the order was created")
 
 class ClientOrder(BaseModel):

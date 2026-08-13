@@ -2,8 +2,8 @@ from fastapi.testclient import TestClient
 import pytest
 from main import app
 
-@pytest.fixture
-def client_restore(autouse=True):
+@pytest.fixture(autouse=True)
+def client_restore():
     app.state.orders.clear()
     app.state.next_order_id = 1
     yield
@@ -17,7 +17,6 @@ def client_with_orders():
     }
     with TestClient(app) as client:
         yield client
-    app.state.orders = {}  # Clean up after the test
 
 @pytest.fixture
 def client_without_orders():
@@ -25,7 +24,6 @@ def client_without_orders():
     app.state.next_order_id = 1
     with TestClient(app) as client:
         yield client
-    app.state.orders = {}
 
 @pytest.mark.parametrize("order_id, status", [
     (1, "shipped"),
@@ -113,3 +111,15 @@ def test_uda_post_order_extra_fields(client_without_orders):
     assert response.json()["order_id"] != 999  # The order_id should be generated, not taken from the request
     assert response.json()["status"] == "pending"  # The status should be set to "pending"
     assert response.json()["total_amount"] == 20.0  # The total_amount should be calculated based on items
+
+def test_uda_post_order_free(client_without_orders):
+    # Arrange
+    free_order_data = {
+        "customer_name": "Free Customer",
+        "items": [{"product_id": "item_free", "quantity": 1, "unit_price": 0.0}],
+    }
+    # Act
+    response = client_without_orders.post("/orders", json=free_order_data)
+    # Assert
+    assert response.status_code == 201  # Created for valid order with free item
+    assert response.json()["total_amount"] == 0.0  # The total_amount should be zero for free items

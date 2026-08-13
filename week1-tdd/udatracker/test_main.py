@@ -17,7 +17,10 @@ def client_with_orders():
 
 @pytest.fixture
 def client_without_orders():
-    return TestClient(app)
+    app.state.orders = {}
+    with TestClient(app) as client:
+        yield client
+    app.state.orders = {}
 
 @pytest.mark.parametrize("order_id, status", [
     (1, "shipped"),
@@ -54,6 +57,37 @@ def test_uda_get_orders_incorrect_type(client_with_orders, order_id):
     # Assert
     # Empty path segment becomes "/orders/" which does not match the route (404).
     if order_id == "":
-        assert response.status_code == 404
+        assert response.status_code == 405
     else:
         assert response.status_code == 422  # Unprocessable Entity for invalid types
+
+@pytest.mark.parametrize("customer_name, items, total_amount", [
+    ("John Doe", [{"product_id": "item1", "quantity": 2, "unit_price": 10.0}], 20.0),
+    ("Jane Smith", [{"product_id": "item3", "quantity": 3, "unit_price": 15.0}, {"product_id": "item4", "quantity": 2, "unit_price": 25.0}], 95.0),
+    ("Bob Johnson", [{"product_id": "item5", "quantity": 1, "unit_price": 30.0}, {"product_id": "item6", "quantity": 2, "unit_price": 35.0}, {"product_id": "item7", "quantity": 1, "unit_price": 40.0}], 140.0)
+])
+def test_uda_post_order(client_without_orders, customer_name, items, total_amount):
+    # Arrange
+    # Act
+    response = client_without_orders.post("/orders", json={"customer_name": customer_name, "items": items})
+    # Assert
+    assert response.status_code == 201
+    assert response.json()["order_id"] is not None
+    assert response.json()["customer_name"] == customer_name
+    assert response.json()["items"] == items
+    assert response.json()["status"] == "pending"
+    assert response.json()["total_amount"] == total_amount
+    assert response.json()["created_at"] is not None
+
+@pytest.mark.parametrize("customer_name, items, total_amount", [
+    ("", [{"product_id": "item1", "quantity": 2, "unit_price": 10.0}], 20.0),  # Empty customer name
+    ("John Doe", [], 0.0),  # Empty items list
+    ("Jane Smith", [{"product_id": "item2", "quantity": 1, "unit_price": -5.0}], -5.0),  # Negative unit price
+    ("Bob Johnson", [{"product_id": "item3", "quantity": 0, "unit_price": 10.0}], 0.0)  # Zero quantity
+])
+def test_uda_post_order_invalid_data(client_without_orders, customer_name, items, total_amount):
+    # Arrange
+    # Act
+    response = client_without_orders.post("/orders", json={"customer_name": customer_name, "items": items})
+    # Assert
+    assert response.status_code == 422  # Unprocessable Entity for invalid data

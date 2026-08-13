@@ -1,15 +1,19 @@
-from xmlrpc import client
-
 from fastapi.testclient import TestClient
 import pytest
 from main import app
 
 @pytest.fixture
+def client_restore(autouse=True):
+    app.state.orders.clear()
+    app.state.next_order_id = 1
+    yield
+
+@pytest.fixture
 def client_with_orders():
     app.state.orders = {
         1: {"order_id": 1, "customer_name": "John Doe", "items": [], "status": "shipped", "total_amount": 100.0, "created_at": "2023-01-01T00:00:00"},
-        2: {"order_id": 2, "customer_name": "Jane Smith", "items": [], "status": "processing", "total_amount": 200.0, "created_at": "2023-01-02T00:00:00"},
-        3: {"order_id": 3, "customer_name": "Bob Johnson", "items": [], "status": "delivered", "total_amount": 300.0, "created_at": "2023-01-03T00:00:00"},
+        2: {"order_id": 2, "customer_name": "Jane Smith", "items": [], "status": "pending", "total_amount": 200.0, "created_at": "2023-01-02T00:00:00"},
+        3: {"order_id": 3, "customer_name": "Bob Johnson", "items": [], "status": "paid", "total_amount": 300.0, "created_at": "2023-01-03T00:00:00"},
     }
     with TestClient(app) as client:
         yield client
@@ -18,14 +22,15 @@ def client_with_orders():
 @pytest.fixture
 def client_without_orders():
     app.state.orders = {}
+    app.state.next_order_id = 1
     with TestClient(app) as client:
         yield client
     app.state.orders = {}
 
 @pytest.mark.parametrize("order_id, status", [
     (1, "shipped"),
-    (2, "processing"),
-    (3, "delivered")
+    (2, "pending"),
+    (3, "paid")
 ])
 def test_uda_get_orders_id_exists(client_with_orders, order_id, status):
     # Arrange
@@ -91,3 +96,20 @@ def test_uda_post_order_invalid_data(client_without_orders, customer_name, items
     response = client_without_orders.post("/orders", json={"customer_name": customer_name, "items": items})
     # Assert
     assert response.status_code == 422  # Unprocessable Entity for invalid data
+
+def test_uda_post_order_extra_fields(client_without_orders):
+    # Arrange
+    extra_data = {
+        "customer_name": "John Doe",
+        "items": [{"product_id": "item1", "quantity": 2, "unit_price": 10.0}],
+        "total_amount": 0.0,  # This field should be calculated, not provided
+        "order_id": 999,  # This field should be generated, not provided
+        "status": "paid",  # This field should be set to "pending" initially
+    }
+    # Act
+    response = client_without_orders.post("/orders", json=extra_data)
+    # Assert
+    assert response.status_code == 201  # Created for valid order with extra fields
+    assert response.json()["order_id"] != 999  # The order_id should be generated, not taken from the request
+    assert response.json()["status"] == "pending"  # The status should be set to "pending"
+    assert response.json()["total_amount"] == 20.0  # The total_amount should be calculated based on items

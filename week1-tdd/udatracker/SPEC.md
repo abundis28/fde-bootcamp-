@@ -47,7 +47,12 @@ Storage is **in-memory** for now (a dict, like your TaskStore) — no database.
 
 ### `GET /orders`  — list orders   *(Day 7)*
 - Returns all orders. Supports optional `?status=` filter (e.g. `?status=pending`).
-- Empty store → `200` with an empty list (not a 404).
+- Empty store, or a valid status with no matches → `200` with an empty list (not a 404).
+- **Invalid status value** (e.g. `?status=123`) → **422**, with a body listing the
+  valid statuses. Rationale: an unknown status is the caller's error (a 4xx), and
+  must be distinguished from a valid-but-empty result. Enforce this by typing the
+  query param as the `OrderStatus` enum so FastAPI validates it automatically —
+  the same enum used for the order's `status` field and the PATCH endpoint.
 
 ### `PATCH /orders/{id}`  — update status   *(Day 7)*
 - Body: `{"status": "<new status>"}`. Only `status` is mutable.

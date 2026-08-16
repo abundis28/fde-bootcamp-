@@ -123,3 +123,84 @@ def test_uda_post_order_free(client_without_orders):
     # Assert
     assert response.status_code == 201  # Created for valid order with free item
     assert response.json()["total_amount"] == 0.0  # The total_amount should be zero for free items
+
+def test_uda_patch_existingId_validStatus_hp(client_with_orders):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    order_id = 2  # Existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 200
+    assert response.json()["order_id"] == order_id
+    assert response.json()["status"] == "shipped"
+
+@pytest.mark.parametrize("order_id, json_status", [
+    (1, "purchased"),
+    (2, ""),
+    (3, 5)
+])
+def test_uda_patch_existingId_invalidStatus(client_with_orders, order_id, json_status):
+    #Arrange
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=json_status)
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_patch_nonExistingId(client_with_orders):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    order_id = 999  # Non-existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 404
+
+@pytest.mark.parametrize("order_id", [
+    ("invalid_id"),        # bad id
+    (None)                 # None value
+])
+def test_uda_patch_invalidId(client_with_orders, order_id):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_patch_missingStatus(client_with_orders):
+    #Arrange
+    update_payload = {
+        # Missing "status" field
+    }
+    order_id = 1  # Existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 422
+
+@pytest.mark.parametrize("order_id, status", [
+    (1, "shipped"),
+    (1, "pending"),
+    (1, "paid")
+])
+def test_uda_patch_invalidTransition_br(order_id, status):
+    #Arrange
+    update_payload = {
+        "status": status  # Invalid type for status
+    }
+    order_id = order_id  # Existing order ID
+    app.state.orders = {
+        1: {"order_id": 1, "customer_name": "John Doe", "items": [], "status": "cancelled", "total_amount": 100.0, "created_at": "2023-01-01T00:00:00"},
+    }
+    #Act
+    with TestClient(app) as client:
+        response = client.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 409

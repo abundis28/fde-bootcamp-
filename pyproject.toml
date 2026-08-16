@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+markers = [
+    "integration: Marks tests as integration tests."
+]

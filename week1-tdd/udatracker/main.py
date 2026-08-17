@@ -46,8 +46,10 @@ def get_order(order_id: int = Path(..., ge=1)):
     return orders[order_id]
 
 @app.get("/orders")
-def get_order_query(status: OrderStatus):
+def get_order_query(status: OrderStatus | None = None):
     orders = app.state.orders
+    if status is None:
+        return list(orders.values())
     return [order for order in orders.values() if order["status"] == status]
 
 @app.post("/orders")

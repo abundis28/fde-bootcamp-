@@ -237,6 +237,15 @@ def test_uda_get_query_no_orders(client_without_orders):
     orders = response.json()
     assert orders == []  # Should return an empty list when no orders exist
 
+def test_uda_get_query_no_status(client_with_orders):
+    # Arrange
+    # Act
+    response = client_with_orders.get("/orders")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert len(orders) == 3  # Should return all orders when no status is provided
+
 @pytest.mark.parametrize("order_id", [1, 2, 3])
 def test_uda_delete_existingId(client_with_orders, order_id):
     #Arrange

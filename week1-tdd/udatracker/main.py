@@ -45,6 +45,11 @@ def get_order(order_id: int = Path(..., ge=1)):
         raise HTTPException(status_code=404, detail="Order not found")
     return orders[order_id]
 
+@app.get("/orders")
+def get_order_query(status: OrderStatus):
+    orders = app.state.orders
+    return [order for order in orders.values() if order["status"] == status]
+
 @app.post("/orders")
 def create_order(client_order: ClientOrder):
     orders = app.state.orders

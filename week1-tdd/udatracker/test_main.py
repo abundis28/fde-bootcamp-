@@ -236,3 +236,38 @@ def test_uda_get_query_no_orders(client_without_orders):
     assert response.status_code == 200
     orders = response.json()
     assert orders == []  # Should return an empty list when no orders exist
+
+@pytest.mark.parametrize("order_id", [1, 2, 3])
+def test_uda_delete_existingId(client_with_orders, order_id):
+    #Arrange
+    #Act
+    delete_response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert delete_response.status_code == 200
+    assert app.state.orders[order_id]["status"] == "cancelled"
+
+def test_uda_delete_nonExistingId(client_with_orders):
+    #Arrange
+    order_id = 999
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 404
+
+def test_uda_delete_alreadyCancelled(client_with_orders):
+    #Arrange
+    order_id = 1  # Existing order ID
+    # First, cancel the order
+    client_with_orders.delete(f"/orders/{order_id}")
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 200
+
+@pytest.mark.parametrize("order_id", ["id", None, 0, -1])
+def test_uda_delete_invalidID(client_with_orders, order_id):
+    #Arrange
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 422

@@ -79,3 +79,11 @@ def update_order_status(order_id: int = Path(..., ge=1), payload: StatusModel = 
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": "Cannot update a cancelled order"})
     orders[order_id]["status"] = new_status
     return orders[order_id]
+
+@app.delete("/orders/{order_id}")
+def delete_order(order_id: int = Path(..., ge=1)):
+    orders = app.state.orders
+    if order_id not in orders:
+        raise HTTPException(status_code=404, detail="Order not found")
+    orders[order_id]["status"] = OrderStatus.cancelled
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"detail": "Order cancelled successfully"})

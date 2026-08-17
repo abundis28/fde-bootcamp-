@@ -204,3 +204,35 @@ def test_uda_patch_invalidTransition_br(order_id, status):
         response = client.patch(f"/orders/{order_id}", json=update_payload)
     #Assert
     assert response.status_code == 409
+
+def test_uda_get_query_orders_by_status(client_with_orders):
+    # Arrange
+    status = "pending"
+    # Act
+    response = client_with_orders.get(f"/orders?status={status}")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert all(order["status"] == status for order in orders)
+
+@pytest.mark.parametrize("status", [
+    "purchased",
+    "",
+    4
+])
+def test_uda_get_query_invalid_status(client_with_orders, status):
+    #Arrange
+    #Act
+    response = client_with_orders.get(f"/orders?status={status}")
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_get_query_no_orders(client_without_orders):
+    # Arrange
+    status = "cancelled"
+    # Act
+    response = client_without_orders.get(f"/orders?status={status}")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == []  # Should return an empty list when no orders exist

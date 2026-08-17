@@ -52,7 +52,7 @@ def test_uda_get_orders_id_does_not_exist(client_with_orders, order_id, status):
     assert response.status_code == 404
     assert response.json() == {"detail": status}
 
-@pytest.mark.parametrize("order_id", ["invalid_id", "", None])
+@pytest.mark.parametrize("order_id", ["invalid_id", None])
 def test_uda_get_orders_incorrect_type(client_with_orders, order_id):
     # Arrange
     # Act

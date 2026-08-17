@@ -15,7 +15,7 @@ class OrderStatus(str, Enum):
     shipped = "shipped"
     cancelled = "cancelled"
 
-class StatusUpdate(BaseModel):
+class StatusModel(BaseModel):
     status: OrderStatus = Field(...)
 
 class OrderItem(BaseModel):
@@ -65,7 +65,7 @@ def create_order(client_order: ClientOrder):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=order.model_dump())
 
 @app.patch("/orders/{order_id}")
-def update_order_status(order_id: int = Path(..., ge=1), payload: StatusUpdate = Body(...)):
+def update_order_status(order_id: int = Path(..., ge=1), payload: StatusModel = Body(...)):
     new_status = payload.status
     orders = app.state.orders
     if order_id not in orders:

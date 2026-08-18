@@ -1,61 +1,33 @@
-alembic==1.16.5
 annotated-doc==0.0.4
 annotated-types==0.7.0
-anthropic==0.102.0
-anyio==4.12.1
-brotlipy==0.7.0
-certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1754231422783/work/certifi
-cffi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_54011am4vz/croot/cffi_1669354596976/work
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
-click==8.1.8
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1733218098505/work
-conda==22.11.1
-conda-package-handling @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_978q9xpmci/croot/conda-package-handling_1666940386714/work
-coverage==7.10.7
-cryptography @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_20erp7jjos/croot/cryptography_1665612656373/work
-distro==1.9.0
-docstring_parser==0.18.0
-exceptiongroup @ file:///home/conda/feedstock_root/build_artifacts/exceptiongroup_1733208806608/work
-fastapi==0.128.8
+anyio==4.14.2
+certifi==2026.6.17
+click==8.4.2
+coverage==7.15.2
+fastapi==0.139.2
 h11==0.16.0
 httpcore==1.0.9
+httptools==0.8.0
 httpx==0.28.1
-idna @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_771olrhiqw/croot/idna_1666125579282/work
-iniconfig @ file:///home/conda/feedstock_root/build_artifacts/iniconfig_1733223141826/work
-Jinja2==3.1.6
-jiter==0.14.0
-keras @ file:///home/ktietz/ci_310/keras_split_1643826818613/work/keras-2.6.0-py2.py3-none-any.whl
-Mako==1.3.12
-MarkupSafe==3.0.3
-numpy==2.0.2
-packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_packaging_1777103621/work
-pdfminer.six==20251107
-pdfplumber==0.11.8
-pillow==11.3.0
+idna==3.18
+iniconfig==2.3.0
+markdown-it-py==4.2.0
+mdurl==0.1.2
+packaging==26.2
 pluggy==1.6.0
-pycosat @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_e9xhel3kyj/croot/pycosat_1666805516297/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
 pydantic==2.13.4
-pydantic_core==2.46.4
-Pygments==2.20.0
-pyOpenSSL @ file:///opt/conda/conda-bld/pyopenssl_1643788558760/work
-pypdfium2==5.9.0
-PySocks @ file:///Users/ktietz/Code/oss/ci_pkgs/pysocks_1626781349491/work
-pytest @ file:///home/conda/feedstock_root/build_artifacts/pytest_1704035161844/work
+pydantic-core==2.46.4
+pygments==2.20.0
+pytest==9.1.1
 pytest-cov==7.1.0
-python-dotenv==1.2.1
-python-multipart==0.0.20
-PyYAML==6.0.3
-requests @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b15e28ca-768e-4951-b4c6-8a7476e43183hrjpnkg9/croots/recipe/requests_1657734638595/work
-ruamel.yaml @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_dby9tad7ud/croots/recipe/ruamel.yaml_1664988526357/work
-ruamel.yaml.clib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f64xdg2rww/croot/ruamel.yaml.clib_1666302244208/work
-sniffio==1.3.1
-SQLAlchemy==2.0.50
-starlette==0.49.3
-tomli @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_tomli_1753796677/work
-toolz @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_362wyqvvgy/croot/toolz_1667464079070/work
-tqdm @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_637jfu39ar/croots/recipe/tqdm_1664392693982/work
+python-dotenv==1.2.2
+pyyaml==6.0.3
+respx==0.23.1
+rich==15.0.0
+starlette==1.3.1
+typing-extensions==4.16.0
 typing-inspection==0.4.2
-typing_extensions==4.15.0
-urllib3 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_eetjnk38s1/croot/urllib3_1666298946680/work
-uvicorn==0.39.0
+uvicorn==0.51.0
+uvloop==0.22.1
+watchfiles==1.2.0
+websockets==16.1.1

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 from fastapi import Body, FastAPI, HTTPException, Path, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -38,6 +39,14 @@ class ClientOrder(BaseModel):
 def calculate_total_amount(items: list[OrderItem]) -> float:
     return sum(item.quantity * item.unit_price for item in items)
 
+@app.get("/orders/summary")
+def get_orders_summary():
+    orders = app.state.orders
+    summary = {s.value: 0 for s in OrderStatus}
+    for order in orders.values():
+        summary[order["status"]] += 1
+    return summary
+
 @app.get("/orders/{order_id}")
 def get_order(order_id: int = Path(..., ge=1)):
     orders = app.state.orders
@@ -46,7 +55,7 @@ def get_order(order_id: int = Path(..., ge=1)):
     return orders[order_id]
 
 @app.get("/orders")
-def get_order_query(status: OrderStatus | None = None):
+def get_order_query(status: Optional[OrderStatus] = None):
     orders = app.state.orders
     if status is None:
         return list(orders.values())

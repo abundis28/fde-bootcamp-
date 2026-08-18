@@ -280,3 +280,52 @@ def test_uda_delete_invalidID(client_with_orders, order_id):
     response = client_with_orders.delete(f"/orders/{order_id}")
     #Assert
     assert response.status_code == 422
+
+def test_uda_get_summary_cero_count(client_with_orders):
+    # Arrange
+    # Act
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 1, "pending": 1, "paid": 1, "cancelled": 0}
+
+def test_uda_get_summary_after_deletion(client_with_orders):
+    # Arrange
+    # Act
+    client_with_orders.delete("/orders/1")  # Cancel order with ID 1
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 1, "paid": 1, "cancelled": 1}
+
+def test_uda_get_summary_no_orders(client_without_orders):
+    # Arrange
+    # Act
+    response = client_without_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 0, "paid": 0, "cancelled": 0}
+
+def test_uda_get_summary_after_posting(client_without_orders):
+    # Arrange
+    client_without_orders.post("/orders", json={"customer_name": "John Doe", "items": [{"product_id": "item1", "quantity": 2, "unit_price": 10.0}]})
+    client_without_orders.post("/orders", json={"customer_name": "Jane Smith", "items": [{"product_id": "item2", "quantity": 1, "unit_price": 20.0}]})
+    # Act
+    response = client_without_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 2, "paid": 0, "cancelled": 0}
+
+def test_uda_get_summary_after_patch(client_with_orders):
+    # Arrange - initial state: order 1=shipped, 2=pending, 3=paid
+    client_with_orders.patch("/orders/2", json={"status": "paid"})  # pending → paid
+    # Act
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 1, "pending": 0, "paid": 2, "cancelled": 0}

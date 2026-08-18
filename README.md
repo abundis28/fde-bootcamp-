@@ -121,7 +121,7 @@ Returns **200** with the updated order, **404** if not found, **422** for an inv
 curl -s -X DELETE http://127.0.0.1:8000/orders/1
 ```
 
-Marks the order as `cancelled`. Returns **200** on success or **404** if not found.
+Marks the order as `cancelled` rather than removing it from storage — soft-delete preserves the audit trail so merchants can always look up what happened to a past order. Returns **200** on success or **404** if not found.
 
 ---
 
@@ -138,3 +138,9 @@ Returns **200** with a count of orders per status:
 ```
 
 All four statuses are always present, even when their count is zero.
+
+---
+
+### AI Usage
+
+Claude Code was used to generate the `GET /orders/summary` implementation and flag the route-ordering risk. All output was reviewed before acceptance: the enum-seeding approach and route declaration order were verified manually against the test assertions.

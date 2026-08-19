@@ -52,7 +52,7 @@ def test_uda_get_orders_id_does_not_exist(client_with_orders, order_id, status):
     assert response.status_code == 404
     assert response.json() == {"detail": status}
 
-@pytest.mark.parametrize("order_id", ["invalid_id", "", None])
+@pytest.mark.parametrize("order_id", ["invalid_id", None])
 def test_uda_get_orders_incorrect_type(client_with_orders, order_id):
     # Arrange
     # Act
@@ -123,3 +123,209 @@ def test_uda_post_order_free(client_without_orders):
     # Assert
     assert response.status_code == 201  # Created for valid order with free item
     assert response.json()["total_amount"] == 0.0  # The total_amount should be zero for free items
+
+def test_uda_patch_existingId_validStatus_hp(client_with_orders):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    order_id = 2  # Existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 200
+    assert response.json()["order_id"] == order_id
+    assert response.json()["status"] == "shipped"
+
+@pytest.mark.parametrize("order_id, json_status", [
+    (1, "purchased"),
+    (2, ""),
+    (3, 5)
+])
+def test_uda_patch_existingId_invalidStatus(client_with_orders, order_id, json_status):
+    #Arrange
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=json_status)
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_patch_nonExistingId(client_with_orders):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    order_id = 999  # Non-existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 404
+
+@pytest.mark.parametrize("order_id", [
+    ("invalid_id"),        # bad id
+    (None)                 # None value
+])
+def test_uda_patch_invalidId(client_with_orders, order_id):
+    #Arrange
+    update_payload = {
+        "status": "shipped"
+    }
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_patch_missingStatus(client_with_orders):
+    #Arrange
+    update_payload = {
+        # Missing "status" field
+    }
+    order_id = 1  # Existing order ID
+    #Act
+    response = client_with_orders.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 422
+
+@pytest.mark.parametrize("order_id, status", [
+    (1, "shipped"),
+    (1, "pending"),
+    (1, "paid")
+])
+def test_uda_patch_invalidTransition_br(order_id, status):
+    #Arrange
+    update_payload = {
+        "status": status  # Invalid type for status
+    }
+    order_id = order_id  # Existing order ID
+    app.state.orders = {
+        1: {"order_id": 1, "customer_name": "John Doe", "items": [], "status": "cancelled", "total_amount": 100.0, "created_at": "2023-01-01T00:00:00"},
+    }
+    #Act
+    with TestClient(app) as client:
+        response = client.patch(f"/orders/{order_id}", json=update_payload)
+    #Assert
+    assert response.status_code == 409
+
+def test_uda_get_query_orders_by_status(client_with_orders):
+    # Arrange
+    status = "pending"
+    # Act
+    response = client_with_orders.get(f"/orders?status={status}")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert all(order["status"] == status for order in orders)
+
+@pytest.mark.parametrize("status", [
+    "purchased",
+    "",
+    4
+])
+def test_uda_get_query_invalid_status(client_with_orders, status):
+    #Arrange
+    #Act
+    response = client_with_orders.get(f"/orders?status={status}")
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_get_query_no_orders(client_without_orders):
+    # Arrange
+    status = "cancelled"
+    # Act
+    response = client_without_orders.get(f"/orders?status={status}")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == []  # Should return an empty list when no orders exist
+
+def test_uda_get_query_no_status(client_with_orders):
+    # Arrange
+    # Act
+    response = client_with_orders.get("/orders")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert len(orders) == 3  # Should return all orders when no status is provided
+
+@pytest.mark.parametrize("order_id", [1, 2, 3])
+def test_uda_delete_existingId(client_with_orders, order_id):
+    #Arrange
+    #Act
+    delete_response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert delete_response.status_code == 200
+    assert app.state.orders[order_id]["status"] == "cancelled"
+
+def test_uda_delete_nonExistingId(client_with_orders):
+    #Arrange
+    order_id = 999
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 404
+
+def test_uda_delete_alreadyCancelled(client_with_orders):
+    #Arrange
+    order_id = 1  # Existing order ID
+    # First, cancel the order
+    client_with_orders.delete(f"/orders/{order_id}")
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 200
+
+@pytest.mark.parametrize("order_id", ["id", None, 0, -1])
+def test_uda_delete_invalidID(client_with_orders, order_id):
+    #Arrange
+    #Act
+    response = client_with_orders.delete(f"/orders/{order_id}")
+    #Assert
+    assert response.status_code == 422
+
+def test_uda_get_summary_cero_count(client_with_orders):
+    # Arrange
+    # Act
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 1, "pending": 1, "paid": 1, "cancelled": 0}
+
+def test_uda_get_summary_after_deletion(client_with_orders):
+    # Arrange
+    # Act
+    client_with_orders.delete("/orders/1")  # Cancel order with ID 1
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 1, "paid": 1, "cancelled": 1}
+
+def test_uda_get_summary_no_orders(client_without_orders):
+    # Arrange
+    # Act
+    response = client_without_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 0, "paid": 0, "cancelled": 0}
+
+def test_uda_get_summary_after_posting(client_without_orders):
+    # Arrange
+    client_without_orders.post("/orders", json={"customer_name": "John Doe", "items": [{"product_id": "item1", "quantity": 2, "unit_price": 10.0}]})
+    client_without_orders.post("/orders", json={"customer_name": "Jane Smith", "items": [{"product_id": "item2", "quantity": 1, "unit_price": 20.0}]})
+    # Act
+    response = client_without_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 0, "pending": 2, "paid": 0, "cancelled": 0}
+
+def test_uda_get_summary_after_patch(client_with_orders):
+    # Arrange - initial state: order 1=shipped, 2=pending, 3=paid
+    client_with_orders.patch("/orders/2", json={"status": "paid"})  # pending → paid
+    # Act
+    response = client_with_orders.get("/orders/summary")
+    # Assert
+    assert response.status_code == 200
+    orders = response.json()
+    assert orders == {"shipped": 1, "pending": 0, "paid": 2, "cancelled": 0}
